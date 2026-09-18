@@ -1,0 +1,31 @@
+name: hunter-sae-fetch
+on:
+  push:
+    branches: [hunter-sae-fetch]
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch SAE
+        run: git clone --depth 1 https://github.com/naTmeg/ScriptedAmigaEmulator.git sae-src
+      - name: Bundle SAE
+        shell: bash
+        run: |
+          files=(
+            prototypes.js utils.js dms.js config.js roms.js memory.js autoconf.js expansion.js
+            events.js gayle.js ide.js filesys.js hardfile.js dongle.js input.js serpar.js
+            custom.js blitter.js copper.js playfield.js video.js audio.js cia.js disk.js
+            rtc.js m68k.js cpu.js amiga.js
+          )
+          : > scriptedamigaemulator.js
+          for f in "${files[@]}"; do
+            cat "sae-src/sae/$f" >> scriptedamigaemulator.js
+            printf '\n;\n' >> scriptedamigaemulator.js
+          done
+          wc -c scriptedamigaemulator.js
+      - name: Upload core
+        uses: actions/upload-artifact@v4
+        with:
+          name: sae-core
+          path: scriptedamigaemulator.js
+          retention-days: 1
